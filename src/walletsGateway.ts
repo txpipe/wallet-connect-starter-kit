@@ -3,8 +3,6 @@ import { SUPPORTED_WALLETS } from "./wallets";
 import { IWallet, WalletInfo, WALLET_IDS } from "./wallets/base"
 import { WalletNotAvailableError, WalletNotEnabledError } from "./wallets/errors";
 
-let Buffer = require('buffer/').Buffer;
-
 interface IConnectedWallet {
     getBalance(): Promise<Number>,
     getNetworkId(): Promise<Number>,
@@ -62,7 +60,7 @@ async function getBalance(): Promise<string> {
   if (!CONNECTED_WALLET_API) throw new WalletNotEnabledError();
   
   const balanceCBORHex = await CONNECTED_WALLET_API.getBalance();
-  const balance = Value.from_bytes(Buffer.from(balanceCBORHex, "hex")).coin().to_str();
+  const balance = Value.from_hex(String(balanceCBORHex)).coin().to_str();
 
   return balance;
 }
@@ -91,30 +89,30 @@ async function getNetwork(): Promise<string>{
 /**
  * Returns a list of all used (included in some on-chain transaction) addresses controlled by the wallet
  */
-async function getUsedAddresses():Promise<Address[]> {
+async function getUsedAddresses():Promise<string[]> {
   if (!CONNECTED_WALLET_API) throw new WalletNotEnabledError();
   const addresses = await CONNECTED_WALLET_API.getUsedAddresses();
-  return addresses;
+  return addresses.map(item => Address.from_hex(String(item)).to_bech32(undefined));
 }
 
 /**
  * Returns a list of unused addresses controlled by the wallet.
  * @returns 
  */
-async function getUnusedAddresses(): Promise<Address[]> {
+async function getUnusedAddresses(): Promise<string[]> {
   if (!CONNECTED_WALLET_API) throw new WalletNotEnabledError();
   const addresses = await CONNECTED_WALLET_API.getUnusedAddresses();
-  return addresses;
+  return addresses.map(item => Address.from_hex(String(item)).to_bech32(undefined));
 }
 
 /**
  * Returns the reward addresses owned by the wallet. This can return multiple addresses
  * @returns 
  */
-async function getRewardAddresses(): Promise<Address[]> {
+async function getRewardAddresses(): Promise<string[]> {
   if (!CONNECTED_WALLET_API) throw new WalletNotEnabledError();
-  const addresses = await CONNECTED_WALLET_API.getUnusedAddresses();
-  return addresses;
+  const addresses = await CONNECTED_WALLET_API.getRewardAddresses();
+  return addresses.map(item => Address.from_hex(String(item)).to_bech32(undefined));
 }
 
 /**
@@ -123,10 +121,10 @@ async function getRewardAddresses(): Promise<Address[]> {
  * This can be used as a generic receive address as well.
  * @returns 
  */
-async function getChangeAddress(): Promise<Address> {
+async function getChangeAddress(): Promise<string> {
   if (!CONNECTED_WALLET_API) throw new WalletNotEnabledError();
   const address = await CONNECTED_WALLET_API.getChangeAddress();
-  return address;
+  return Address.from_hex(String(address)).to_bech32();
 }
 
 /**
@@ -139,18 +137,6 @@ async function getUtxos(): Promise<any[]> {
   return utxos;
 }
 
-/**
- * Signs the data send in content by using the specified address
- * Requires the wallet to be enabled
- * @returns 
- */
-async function signData(address: Address, content: string) {
-  if (!CONNECTED_WALLET_API) throw new WalletNotEnabledError();
-  const payload = Buffer.from(content, "ascii").toString('hex');
-  const signedData = await CONNECTED_WALLET_API.signData(address, payload);
-  return signedData;
-}
-
 export {
     getAvailableWallets,
     enable,
@@ -160,6 +146,5 @@ export {
     getUnusedAddresses,
     getRewardAddresses,
     getChangeAddress,
-    signData,
     getUtxos,
 }

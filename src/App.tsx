@@ -1,11 +1,15 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import "./App.css";
 import { WalletInfo, WALLET_IDS } from "./wallets/base";
 import {
   enable,
   getAvailableWallets,
   getBalance,
+  getChangeAddress,
   getNetwork,
+  getRewardAddresses,
+  getUnusedAddresses,
+  getUsedAddresses,
 } from "./walletsGateway";
 
 function WalletCard(props: {
@@ -35,15 +39,57 @@ function WalletCard(props: {
   );
 }
 
+type WalletState = {
+  balance: string;
+  network: string;
+  unusedAddresses: string[];
+  usedAddresses: string[];
+  rewardAddresses: string[];
+  changeAddress: string;
+};
+
+function AddressTableRow(props: { address: string }) {
+  return (
+    <tr className="odd:bg-gray-900 even:bg-gray-850 hover:bg-gray-750 transition-all">
+      <td className="text-sm px-6 py-3">{props.address}</td>
+    </tr>
+  );
+}
+
+function AddressesTable(props: { addresses: string[] }) {
+  return (
+    <table className="rounded-md overflow-hidden w-full">
+      <thead className="border-b border-gray-950">
+        <tr>
+          <th
+            className="bg-gray-900 py-3 px-6 text-sm text-left text-gray-400 font-normal"
+            scope="col"
+          >
+            Address
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        {props.addresses.map((x) => (
+          <AddressTableRow key={x} address={x} />
+        ))}
+      </tbody>
+    </table>
+  );
+}
+
 function App() {
   const [wallets, setWallets] = useState([] as WalletInfo[]);
   const [selectedWallet, setSelectedWallet] = useState<
     WALLET_IDS | undefined
   >();
   const [enabledWallet, setEnabledWallet] = useState<WalletInfo>();
-  const [balance, setBalance] = useState<string>();
-  const [network, setNetwork] = useState<string>();
+  const [walletState, setWalletState] = useState<Partial<WalletState>>();
   const [error, setError] = useState();
+
+  const mergeWalletState = useCallback((delta: Partial<WalletState>) => {
+    setWalletState((prev) => ({ ...prev, ...delta }));
+  }, []);
 
   useEffect(() => {
     setWallets(getAvailableWallets());
@@ -59,18 +105,28 @@ function App() {
         setEnabledWallet(await enable(selectedWallet!));
 
         // Gets the enabled wallet balance
-        setBalance(await getBalance());
+        mergeWalletState({ balance: await getBalance() });
 
         // Gets the enabled wallet network
-        setNetwork(await getNetwork());
+        mergeWalletState({ network: await getNetwork() });
+
+        // Gets the list of unused addresses by the wallet
+        mergeWalletState({ usedAddresses: await getUsedAddresses() });
+
+        // Gets the list of unused addresses by the wallet
+        mergeWalletState({ unusedAddresses: await getUnusedAddresses() });
+
+        mergeWalletState({ rewardAddresses: await getRewardAddresses() });
+
+        mergeWalletState({ changeAddress: await getChangeAddress() });
       }
     } catch (error: any) {
       setError(error.message || "unknown error");
     }
-  }, [selectedWallet]);
+  }, [mergeWalletState, selectedWallet]);
 
   return (
-    <div className="bg-gray-950 h-screen w-screen">
+    <div className="bg-gray-950 w-screen h-full">
       <div className="container mx-auto px-4 sm:px-6 max-w-6xl p-16 text-white">
         <header className="flex flex-col mb-4">
           <div className="flex">
@@ -111,11 +167,54 @@ function App() {
                 Wallet: <span className="text-white">{selectedWallet}</span>
               </p>
               <p className="font-semibold uppercase text-txblue text-xs mt-2">
-                Balance: <span className="text-white">{balance}</span>
+                Balance:{" "}
+                <span className="text-white">{walletState?.balance}</span>
               </p>
               <p className="font-semibold uppercase text-txblue text-xs mt-2">
-                Network: <span className="text-white">{network}</span>
+                Network:{" "}
+                <span className="text-white">{walletState?.network}</span>
               </p>
+
+              {walletState?.usedAddresses && (
+                <>
+                  <h4 className="font-semibold uppercase text-txblue text-xs mt-8 mb-4">
+                    used addresses
+                  </h4>
+                  <AddressesTable
+                    addresses={walletState.usedAddresses}
+                  ></AddressesTable>
+                </>
+              )}
+              {walletState?.unusedAddresses && (
+                <>
+                  <h4 className="font-semibold uppercase text-txblue text-xs mt-8 mb-4">
+                    unused addresses
+                  </h4>
+                  <AddressesTable
+                    addresses={walletState.unusedAddresses}
+                  ></AddressesTable>
+                </>
+              )}
+              {walletState?.rewardAddresses && (
+                <>
+                  <h4 className="font-semibold uppercase text-txblue text-xs mt-8 mb-4">
+                    reward addresses
+                  </h4>
+                  <AddressesTable
+                    addresses={walletState.rewardAddresses}
+                  ></AddressesTable>
+                </>
+              )}
+              {walletState?.changeAddress && (
+                <>
+                  <h4 className="font-semibold uppercase text-txblue text-xs mt-8 mb-4">
+                    Change address
+                  </h4>
+                  <AddressesTable
+                    addresses={[walletState.changeAddress]}
+                  ></AddressesTable>
+                </>
+              )}
             </div>
           ) : null}
         </div>
