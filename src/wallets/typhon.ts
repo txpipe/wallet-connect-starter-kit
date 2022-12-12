@@ -1,10 +1,7 @@
-import { IWallet, WalletInfo, WALLET_IDS } from './base';
+import { WalletMetadata } from "../hooks/listWallets";
+import { Wallet, WALLET_IDS } from "./base";
 
-export const typhonWallet: IWallet = {
-  getId: function (): string {
-    return WALLET_IDS.Typhon;
-  },
-
+export const typhonWallet: Wallet = {
   isAvailable: function (): boolean {
     return !!window?.cardano?.typhon;
   },
@@ -13,12 +10,12 @@ export const typhonWallet: IWallet = {
     return await window?.cardano?.typhon.enable();
   },
 
-  getInfo: function (): WalletInfo {
+  getMetadata: function (): WalletMetadata {
     return {
       id: WALLET_IDS.Typhon,
-      icon: window?.cardano?.typhon.icon,
-      name: window?.cardano?.typhon.name,
-      apiVersion: window?.cardano?.typhon.apiVersion
-    }
-  }
+      icon: window?.cardano?.typhon?.icon,
+      name: window?.cardano?.typhon?.name,
+      apiVersion: window?.cardano?.typhon?.apiVersion,
+    };
+  },
 };

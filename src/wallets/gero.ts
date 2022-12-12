@@ -1,10 +1,7 @@
-import { IWallet, WalletInfo, WALLET_IDS } from './base';
+import { WalletMetadata } from "../hooks/listWallets";
+import { Wallet, WALLET_IDS } from "./base";
 
-export const geroWallet: IWallet = {
-  getId: function (): string {
-    return WALLET_IDS.Gero;
-  },
-
+export const geroWallet: Wallet = {
   isAvailable: function (): boolean {
     return !!window?.cardano?.gerowallet;
   },
@@ -13,12 +10,12 @@ export const geroWallet: IWallet = {
     return await window?.cardano?.gerowallet.enable();
   },
 
-  getInfo: function (): WalletInfo {
+  getMetadata: function (): WalletMetadata {
     return {
       id: WALLET_IDS.Gero,
-      icon: window?.cardano?.gerowallet.icon,
-      name: window?.cardano?.gerowallet.name,
-      apiVersion: window?.cardano?.gerowallet.apiVersion
-    }
-  }
+      icon: window?.cardano?.gerowallet?.icon,
+      name: window?.cardano?.gerowallet?.name,
+      apiVersion: window?.cardano?.gerowallet?.apiVersion,
+    };
+  },
 };

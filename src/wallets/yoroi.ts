@@ -1,10 +1,7 @@
-import { IWallet, WalletInfo, WALLET_IDS } from './base';
+import { WalletMetadata } from "../hooks/listWallets";
+import { Wallet, WALLET_IDS } from "./base";
 
-export const yoroiWallet: IWallet = {
-  getId: function (): string {
-    return WALLET_IDS.Yoroi;
-  },
-
+export const yoroiWallet: Wallet = {
   isAvailable: function (): boolean {
     return !!window?.cardano?.yoroi;
   },
@@ -13,12 +10,12 @@ export const yoroiWallet: IWallet = {
     return await window?.cardano?.yoroi.enable();
   },
 
-  getInfo: function (): WalletInfo {
+  getMetadata: function (): WalletMetadata {
     return {
       id: WALLET_IDS.Yoroi,
-      icon: window?.cardano?.yoroi.icon,
-      name: window?.cardano?.yoroi.name,
-      apiVersion: window?.cardano?.yoroi.apiVersion
-    }
-  }
+      icon: window?.cardano?.yoroi?.icon,
+      name: window?.cardano?.yoroi?.name,
+      apiVersion: window?.cardano?.yoroi?.apiVersion,
+    };
+  },
 };

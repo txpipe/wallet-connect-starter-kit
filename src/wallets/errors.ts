@@ -1,16 +1,13 @@
 class WalletNotEnabledError extends Error {
-    constructor() {
-        super('wallet not enabled');
-    }
+  constructor() {
+    super("wallet not enabled");
+  }
 }
 
 class WalletNotAvailableError extends Error {
-    constructor() {
-        super('wallet not available');
-    }
+  constructor() {
+    super("wallet not available");
+  }
 }
 
-export {
-    WalletNotEnabledError,
-    WalletNotAvailableError,
-} 
+export { WalletNotEnabledError, WalletNotAvailableError };

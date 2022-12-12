@@ -1,33 +1,18 @@
-enum WALLET_IDS {
-    CardWallet = 'cardwallet',
-    CCVault ='ccvault',
-    Eternl = 'eternl',
-    Flint ='flint',
-    Gero ='gero',
-    Nami = 'nami',
-    Typhon = 'typhon',
-    Yoroi ='yoroi',
+import { WalletMetadata } from "../hooks/listWallets";
+
+export enum WALLET_IDS {
+  CardWallet = "cardwallet",
+  CCVault = "ccvault",
+  Eternl = "eternl",
+  Flint = "flint",
+  Gero = "gero",
+  Nami = "nami",
+  Typhon = "typhon",
+  Yoroi = "yoroi",
 }
 
-/**
- * Wallet Interface
- */
-interface IWallet {
-    getId(): string;
-    isAvailable(): boolean;
-    enable(): Promise<any>;
-    getInfo(): WalletInfo;
+export interface Wallet {
+  isAvailable(): boolean;
+  enable(): Promise<any>;
+  getMetadata(): WalletMetadata;
 }
-
-type WalletInfo ={
-    id: WALLET_IDS,
-    icon: string,
-    name: string,
-    apiVersion: string
-}
-
-export type { IWallet, WalletInfo };
-
-export {
-    WALLET_IDS,
-};

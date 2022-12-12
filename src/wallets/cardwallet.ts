@@ -1,10 +1,7 @@
-import { IWallet, WalletInfo, WALLET_IDS } from './base';
+import { WalletMetadata } from "../hooks/listWallets";
+import { Wallet, WALLET_IDS } from "./base";
 
-export const cardWallet: IWallet = {
-  getId: function (): string {
-    return WALLET_IDS.CardWallet;
-  },
-
+export const cardWallet: Wallet = {
   isAvailable: function (): boolean {
     return !!window?.cardano?.cardwallet;
   },
@@ -13,12 +10,13 @@ export const cardWallet: IWallet = {
     return await window?.cardano?.cardwallet.enable();
   },
 
-  getInfo: function (): WalletInfo {
+  getMetadata: function (): WalletMetadata {
     return {
       id: WALLET_IDS.CardWallet,
-      icon: window?.cardano?.cardwallet.icon,
-      name: window?.cardano?.cardwallet.name,
-      apiVersion: window?.cardano?.cardwallet.apiVersion
-    }
-  }
+      icon: window?.cardano?.cardwallet?.icon,
+      name: window?.cardano?.cardwallet?.name,
+      apiVersion: window?.cardano?.cardwallet?.apiVersion,
+    };
+  },
+  
 };
