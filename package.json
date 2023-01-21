@@ -43,13 +43,9 @@
   },
   "devDependencies": {
     "autoprefixer": "^10.4.11",
-    "fs": "^0.0.1-security",
-    "path": "^0.12.7",
     "postcss": "^8.4.16",
     "react-app-rewired": "^2.2.1",
     "tailwindcss": "^3.1.8",
-    "util": "^0.12.5",
-    "webpack": "^5.75.0",
-    "webpack-cli": "^5.0.1"
+    "util": "^0.12.5"
   }
 }
