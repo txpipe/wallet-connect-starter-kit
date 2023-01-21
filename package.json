@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@emurgo/cardano-serialization-lib-asmjs": "^11.1.0",
+    "@emurgo/cardano-serialization-lib-browser": "^11.1.0",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
@@ -18,8 +18,8 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "react-scripts --max_old_space_size=8192 start",
-    "build": "react-scripts --max_old_space_size=4096 build",
+    "start": "react-app-rewired start",
+    "build": "react-app-rewired build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
@@ -43,7 +43,13 @@
   },
   "devDependencies": {
     "autoprefixer": "^10.4.11",
+    "fs": "^0.0.1-security",
+    "path": "^0.12.7",
     "postcss": "^8.4.16",
-    "tailwindcss": "^3.1.8"
+    "react-app-rewired": "^2.2.1",
+    "tailwindcss": "^3.1.8",
+    "util": "^0.12.5",
+    "webpack": "^5.75.0",
+    "webpack-cli": "^5.0.1"
   }
 }

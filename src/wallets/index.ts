@@ -1,9 +1,5 @@
-import { Address, Value } from "@emurgo/cardano-serialization-lib-asmjs";
 import { WalletMetadata } from "../hooks/listWallets";
-import { Wallet, WALLET_IDS } from "./base";
 import { cardWallet } from "./cardwallet";
-import { ccvaultWallet } from "./ccvault";
-import { WalletNotAvailableError } from "./errors";
 import { eternlWallet } from "./eternl";
 import { flintWallet } from "./flint";
 import { geroWallet } from "./gero";
@@ -13,7 +9,6 @@ import { yoroiWallet } from "./yoroi";
 
 export const SUPPORTED_WALLETS = [
   cardWallet,
-  ccvaultWallet,
   eternlWallet,
   flintWallet,
   geroWallet,

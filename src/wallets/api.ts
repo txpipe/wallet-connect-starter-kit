@@ -1,4 +1,4 @@
-import { Address, Value } from "@emurgo/cardano-serialization-lib-asmjs";
+import { Address, Value } from "@emurgo/cardano-serialization-lib-browser";
 import { SUPPORTED_WALLETS } from ".";
 import { WalletMetadata } from "../hooks/listWallets";
 import { WALLET_IDS, Wallet } from "./base";
@@ -47,10 +47,8 @@ async function enable(id: WALLET_IDS): Promise<WalletMetadata> {
  */
 async function getBalance(): Promise<string> {
   if (!CONNECTED_WALLET_API) throw new WalletNotEnabledError();
-
   const balanceCBORHex = await CONNECTED_WALLET_API.getBalance();
   const balance = Value.from_hex(String(balanceCBORHex)).coin().to_str();
-
   return balance;
 }
 
@@ -64,7 +62,7 @@ async function getNetwork(): Promise<string> {
   if (!CONNECTED_WALLET_API) throw new WalletNotEnabledError();
   const networkId = await CONNECTED_WALLET_API.getNetworkId();
 
-  // Converte the network id to human readable names
+  // Converts the network id to human readable names
   switch (networkId) {
     case 0:
       return "testnet";
