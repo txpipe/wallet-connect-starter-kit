@@ -60,12 +60,9 @@ function App() {
   const [enabledWallet, setEnabledWallet] = useState<Partial<WalletState>>();
   const [error, setError] = useState();
 
-  const mergeEnabledWalletState = useCallback(
-    (delta: Partial<WalletState>) => {
-      setEnabledWallet((prev) => ({ ...prev, ...delta }));
-    },
-    []
-  );
+  const mergeEnabledWalletState = useCallback((delta: Partial<WalletState>) => {
+    setEnabledWallet((prev) => ({ ...prev, ...delta }));
+  }, []);
 
   useMemo(async () => {
     try {
@@ -73,11 +70,19 @@ function App() {
 
       if (!selectedWallet) return;
 
+      mergeEnabledWalletState({
+        connected: false,
+        balance: "",
+        network: "",
+        usedAddresses: [],
+        unusedAddresses: [],
+        rewardAddresses: [],
+        changeAddress: "",
+      });
+
       await enable(selectedWallet.id);
 
       mergeEnabledWalletState({ connected: true });
-
-      const balance = await getBalance();
 
       const network = await getNetwork();
 
@@ -90,114 +95,121 @@ function App() {
       const changeAddress = await getChangeAddress();
 
       mergeEnabledWalletState({
-        balance,
         network,
         usedAddresses,
         unusedAddresses,
         rewardAddresses,
         changeAddress,
       });
+
+      const balance = await getBalance();
+
+      mergeEnabledWalletState({ balance });
     } catch (err: any) {
-      setError(err.message || "unknown error");
+      setError(err.message || err.info || err);
     }
   }, [mergeEnabledWalletState, selectedWallet]);
 
   return (
-    <div className="bg-gray-950 w-screen h-full">
-      <div className="container mx-auto px-4 sm:px-6 max-w-6xl p-16 text-white">
-        <header className="flex flex-col mb-4">
-          <div className="flex">
-            <img src="/logo.svg" className="mr-4 w-5 h-5" alt="TxPipe Logo" />
-            <p className="text-sm">Starter Kit provided by TxPipe</p>
-          </div>
-
-          <h1 className="text-4xl font-light mt-2">Wallet Connector</h1>
-          <p className="text-gray-400 mt-8">
-            Select which wallet to connect and perform basic interactions.
-          </p>
-        </header>
-
-        {availableWallets.length ? (
-          <div className="grid gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-            {availableWallets.map((wallet: WalletMetadata) => (
-              <CardWallet
-                key={wallet.id}
-                metadata={wallet}
-                selected={selectedWallet?.id === wallet.id}
-                onClick={() => {
-                  setSelectedWallet(wallet);
-                }}
-              />
-            ))}
-          </div>
-        ) : (
-          <p className="text-red-500">No wallets were found in your browser.</p>
-        )}
-
-        {/* Connected Wallet information */}
-        <div className="mt-8">
-          {enabledWallet?.connected ? (
-            <div className="rounded-md bg-gray-600 bg-opacity-10 p-6">
-              <h3 className="text-xl font-medium tracking-wide">{`Connected to ${selectedWallet?.id}`}</h3>
-              <p className="font-semibold uppercase text-txblue text-xs mt-2">
-                Wallet:{" "}
-                <span className="text-white">{selectedWallet?.name}</span>
-              </p>
-              <p className="font-semibold uppercase text-txblue text-xs mt-2">
-                Balance:{" "}
-                <span className="text-white">{enabledWallet?.balance}</span>
-              </p>
-              <p className="font-semibold uppercase text-txblue text-xs mt-2">
-                Network:{" "}
-                <span className="text-white">{enabledWallet?.network}</span>
-              </p>
-
-              {enabledWallet?.usedAddresses && (
-                <>
-                  <h4 className="font-semibold uppercase text-txblue text-xs mt-8 mb-4">
-                    used addresses
-                  </h4>
-                  <AddressesTable
-                    addresses={enabledWallet.usedAddresses}
-                  ></AddressesTable>
-                </>
-              )}
-              {enabledWallet?.unusedAddresses && (
-                <>
-                  <h4 className="font-semibold uppercase text-txblue text-xs mt-8 mb-4">
-                    unused addresses
-                  </h4>
-                  <AddressesTable
-                    addresses={enabledWallet.unusedAddresses}
-                  ></AddressesTable>
-                </>
-              )}
-              {enabledWallet?.rewardAddresses && (
-                <>
-                  <h4 className="font-semibold uppercase text-txblue text-xs mt-8 mb-4">
-                    reward addresses
-                  </h4>
-                  <AddressesTable
-                    addresses={enabledWallet.rewardAddresses}
-                  ></AddressesTable>
-                </>
-              )}
-              {enabledWallet?.changeAddress && (
-                <>
-                  <h4 className="font-semibold uppercase text-txblue text-xs mt-8 mb-4">
-                    Change address
-                  </h4>
-                  <AddressesTable
-                    addresses={[enabledWallet.changeAddress]}
-                  ></AddressesTable>
-                </>
-              )}
+    <div className="h-screen flex flex-col">
+      <div className="flex-grow flex overflow-auto bg-gray-950">
+        <div className="container mx-auto px-4 sm:px-6 max-w-6xl p-16 text-white ">
+          <header className="flex flex-col mb-4">
+            <div className="flex">
+              <img src="/logo.svg" className="mr-4 w-5 h-5" alt="TxPipe Logo" />
+              <p className="text-sm">Starter Kit provided by TxPipe</p>
             </div>
+
+            <h1 className="text-4xl font-light mt-2">Wallet Connector</h1>
+            <p className="text-gray-400 mt-8">
+              Select which wallet to connect and perform basic interactions.
+            </p>
+          </header>
+
+          {availableWallets.length ? (
+            <div className="grid gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+              {availableWallets.map((wallet: WalletMetadata) => (
+                <CardWallet
+                  key={wallet.id}
+                  metadata={wallet}
+                  selected={selectedWallet?.id === wallet.id}
+                  onClick={() => {
+                    setSelectedWallet(wallet);
+                  }}
+                />
+              ))}
+            </div>
+          ) : (
+            <p className="text-red-500">
+              No wallets were found in your browser.
+            </p>
+          )}
+
+          {/* Connected Wallet information */}
+          <div className="mt-8">
+            {enabledWallet?.connected ? (
+              <div className="rounded-md bg-gray-600 bg-opacity-10 p-6">
+                <h3 className="text-xl font-medium tracking-wide">{`Connected to ${selectedWallet?.id}`}</h3>
+                <p className="font-semibold uppercase text-txblue text-xs mt-2">
+                  Wallet:{" "}
+                  <span className="text-white">{selectedWallet?.name}</span>
+                </p>
+                <p className="font-semibold uppercase text-txblue text-xs mt-2">
+                  Balance:{" "}
+                  <span className="text-white">{enabledWallet?.balance}</span>
+                </p>
+                <p className="font-semibold uppercase text-txblue text-xs mt-2">
+                  Network:{" "}
+                  <span className="text-white">{enabledWallet?.network}</span>
+                </p>
+
+                {enabledWallet?.usedAddresses && (
+                  <>
+                    <h4 className="font-semibold uppercase text-txblue text-xs mt-8 mb-4">
+                      used addresses
+                    </h4>
+                    <AddressesTable
+                      addresses={enabledWallet.usedAddresses}
+                    ></AddressesTable>
+                  </>
+                )}
+                {enabledWallet?.unusedAddresses && (
+                  <>
+                    <h4 className="font-semibold uppercase text-txblue text-xs mt-8 mb-4">
+                      unused addresses
+                    </h4>
+                    <AddressesTable
+                      addresses={enabledWallet.unusedAddresses}
+                    ></AddressesTable>
+                  </>
+                )}
+                {enabledWallet?.rewardAddresses && (
+                  <>
+                    <h4 className="font-semibold uppercase text-txblue text-xs mt-8 mb-4">
+                      reward addresses
+                    </h4>
+                    <AddressesTable
+                      addresses={enabledWallet.rewardAddresses}
+                    ></AddressesTable>
+                  </>
+                )}
+                {enabledWallet?.changeAddress && (
+                  <>
+                    <h4 className="font-semibold uppercase text-txblue text-xs mt-8 mb-4">
+                      Change address
+                    </h4>
+                    <AddressesTable
+                      addresses={[enabledWallet.changeAddress]}
+                    ></AddressesTable>
+                  </>
+                )}
+              </div>
+            ) : null}
+          </div>
+          {error ? (
+            <p className="text-sm text-red-500 mt-2">{`There was an error connecting to the selected wallet: ${error}`}</p>
           ) : null}
         </div>
-        {error ? (
-          <p className="text-sm text-red-500 mt-2">{`There was an error connecting to the selected wallet: ${error}`}</p>
-        ) : null}
       </div>
     </div>
   );
